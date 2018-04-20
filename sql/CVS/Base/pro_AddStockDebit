@@ -1,0 +1,63 @@
+
+CREATE PROCEDURE pro_AddStockDebit 
+		  @tsd_id					varchar(4),	
+			@tsd_time				varchar(20),
+			@tsd_no					varchar(20),
+			@ts_no					varchar(20),
+			@tc_shortname		varchar(20),
+			@tp_no					varchar(20),
+			@tsi_no					varchar(20),
+			@tsd_amount			varchar(20),					
+			@tsd_remark			varchar(500)				
+ AS
+
+SET NOCOUNT ON
+
+declare @cnt 	int
+select @cnt = count(*) from table_stock_debit where tsd_no = @tsd_no
+if (@cnt > 0)
+	begin
+		select MSG = 0
+	end
+else
+	begin
+		insert into table_stock_debit(							
+					tsd_time,
+					tsd_no,
+					ts_no,
+					tc_shortname,
+					tp_no,
+					tsi_no,
+					tsd_amount,					
+					tsd_remark)	
+				values(				
+					@tsd_time,
+					@tsd_no,
+					@ts_no,
+					@tc_shortname,
+					@tp_no,
+					@tsi_no,
+					@tsd_amount,					
+					@tsd_remark)
+					
+			insert into	table_stock_bill(
+					tsb_time,
+					tsi_no,
+					tp_no,
+					tsb_amount,
+					tsb_ref_no
+			)
+			values(
+					@tsd_time,
+					@tsi_no,
+					@tp_no,
+					@tsd_amount,
+					@tsd_no + ':' + @ts_no + '<-->' + @tc_shortname
+			)			
+		select MSG = 1
+				
+	end
+
+SET NOCOUNT OFF
+
+GO
